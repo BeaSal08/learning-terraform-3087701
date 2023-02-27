@@ -1,23 +1,26 @@
-data "aws_ami" "amazon_ami" {
+data "aws_ami" "app_ami" {
+  most_recent = true
+
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-2.0.20220606.1-x86_64-gp2"]
+    values = ["bitnami-tomcat-*-x86_64-hvm-ebs-nami"]
   }
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-  most_recent = true
-  owners      = ["amazon"]
+
+  owners = ["979382823631"] # Bitnami
 }
 
 resource "aws_instance" "web" {
-  ami = data.aws_ami.amazon_ami.id
+  ami           = data.aws_ami.app_ami.id
   instance_type = "t2.micro"
-  availability_zone = "us-east-1e"
+  region = "us-east-1"
 
   tags = {
-    Name = "HelloWorldBea"
+    Name = "HelloWorld"
     Project = "Terraform Learning"
   }
 }
