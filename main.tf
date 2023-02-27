@@ -43,7 +43,7 @@ resource "aws_security_group_rule" "web_http_in" {
   type = "ingress"
   from_port = 80
   to_port = 80
-  protocol = tcp
+  protocol = "tcp"
   cidr_blocks = ["161.69.102.20/32"]
 
   aws_security_group_id = aws_security_group.web.id
@@ -53,8 +53,8 @@ resource "aws_security_group_rule" "web_http_in" {
 resource "aws_security_group_rule" "web_all_out" {
   type = "egress"
   from_port = 0
-  to_port = "-1"
-  protocol = tcp
+  to_port = 0
+  protocol = "-1"
   cidr_blocks = ["0.0.0.0/0"]
 
   aws_security_group_id = aws_security_group.web.id
