@@ -19,7 +19,7 @@ resource "aws_instance" "web" {
   instance_type = "t2.micro"
 
   tags = {
-    Name = "HelloWorld"
+    Name = "HelloWorldBea"
     Project = "Terraform Learning"
   }
 }
