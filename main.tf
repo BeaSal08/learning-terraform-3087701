@@ -55,4 +55,8 @@ module "security-group" {
   egress_rules = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 
+    tags = {
+    Project = "Terraform Learning"
+  }
+
 }
