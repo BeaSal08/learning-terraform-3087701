@@ -23,16 +23,18 @@ module "vpc" {
   azs             = ["us-east-1a", "us-east-1b"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
 
+  enable_nat_gateway = true
+
   tags = {
     Terraform = "true"
-    Project = "Terraform Learning"
+    Environment = "dev"
   }
 }
 
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.app_ami.id
-  instance_type = var.instance_type
-
+  ami                    = data.aws_ami.app_ami.id
+  instance_type          = var.instance_type
+  subnet_id              = module.vpc.public_subnets[0]
   vpc_security_group_ids = [module.security-group.security_group_id]
 
   tags = {
@@ -42,21 +44,19 @@ resource "aws_instance" "web" {
 }
 
 # Security Group via module
+
 module "security-group" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "4.17.1"
+  version = "4.13.0"
+
+  vpc_id  = module.vpc.vpc_id
   name    = "helloworld-sg-module"
-
-  vpc_id = module.vpc.public_subnets[0]
-
   ingress_rules = ["http-80-tcp"]
   ingress_cidr_blocks = ["112.198.36.8/32"]
-
   egress_rules = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 
-    tags = {
+      tags = {
     Project = "Terraform Learning"
   }
-
 }
