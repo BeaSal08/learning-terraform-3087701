@@ -14,15 +14,26 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
-data "aws_vpc" "default" {
-  default = true
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "my-vpc-bea"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["us-east-1a", "us-east-1b"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
+
+  tags = {
+    Terraform = "true"
+    Project = "Terraform Learning"
+  }
 }
 
 resource "aws_instance" "web" {
   ami           = data.aws_ami.app_ami.id
   instance_type = var.instance_type
 
-  vpc_security_group_ids = [aws_security_group.web.id]
+  vpc_security_group_ids = [module.security_group.security_group_id]
 
   tags = {
     Name = "HelloWorldBea"
@@ -36,7 +47,7 @@ module "security-group" {
   version = "4.17.1"
   name    = "helloworld-sg-module"
 
-  vpc_id = data.aws_vpc.default.id
+  vpc_id = module.vpc.public_subnets[0]
 
   ingress_rules = ["http-80-tcp"]
   ingress_cidr_blocks = ["161.69.102.20/32"]
@@ -44,34 +55,4 @@ module "security-group" {
   egress_rules = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 
-}
-
-# Security Group
-resource "aws_security_group" "web" {
-  name        = "helloworld-sg"
-  description = "Allows http IN. Allows everything OUT"
-
-  vpc_id = data.aws_vpc.default.id
-}
-
-# Inbound Security Group Rule
-resource "aws_security_group_rule" "web_http_in" {
-  type = "ingress"
-  from_port = 80
-  to_port = 80
-  protocol = "tcp"
-  cidr_blocks = ["161.69.102.20/32"]
-
-  security_group_id = aws_security_group.web.id
-}
-
-# Outbound Security Group Rule
-resource "aws_security_group_rule" "web_all_out" {
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
-  cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = aws_security_group.web.id
 }
