@@ -27,7 +27,7 @@ module "vpc" {
 
   tags = {
     Terraform = "true"
-    Environment = "dev"
+    Project = "Terraform Learning"
   }
 }
 
