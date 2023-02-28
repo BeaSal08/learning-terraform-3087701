@@ -27,7 +27,57 @@ module "vpc" {
 
   tags = {
     Terraform = "true"
-    Project = "Terraform Learning"
+    Project = "Cap Build"
+  }
+}
+
+module "autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "6.5.2"
+
+  name = "blog"
+
+  min_size            = 1
+  max_size            = 2
+  vpc_zone_identifier = module.vpc.public_subnets
+  target_group_arns   = module.alb.target_group_arns
+  security_groups     = [module.security-group.security_group_id]
+  instance_type       = var.instance_type
+  image_id            = data.aws_ami.app_ami.id
+}
+
+
+module "alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 6.0"
+
+  name = "alb"
+
+  load_balancer_type = "application"
+
+  vpc_id             = module.pc.vpc_id
+  subnets            = module.vpc.public_subnets
+  security_groups    = [module.security-group.security_group_id]
+
+  target_groups = [
+    {
+      name_prefix      = "testbea-"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+    }
+  ]
+
+  http_tcp_listeners = [
+    {
+      port               = 80
+      protocol           = "HTTP"
+      target_group_index = 0
+    }
+  ]
+
+  tags = {
+    Environment = "dev"
   }
 }
 
@@ -39,7 +89,7 @@ resource "aws_instance" "web" {
 
   tags = {
     Name = "HelloWorldBea"
-    Project = "Terraform Learning"
+    Project = "Cap Build"
   }
 }
 
@@ -57,6 +107,6 @@ module "security-group" {
   egress_cidr_blocks = ["0.0.0.0/0"]
 
       tags = {
-    Project = "Terraform Learning"
+    Project = "Cap Build"
   }
 }
