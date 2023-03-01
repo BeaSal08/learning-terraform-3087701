@@ -92,7 +92,7 @@ module "security-group" {
   vpc_id  = module.vpc.vpc_id
   name    = "helloworld-sg-module"
   ingress_rules = ["http-80-tcp"]
-  ingress_cidr_blocks = ["112.198.36.8/32"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 
