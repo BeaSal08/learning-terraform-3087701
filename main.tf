@@ -28,6 +28,7 @@ module "vpc" {
   tags = {
     Terraform = "true"
     Project = "Cap Build"
+    Environment = "dev"
   }
 }
 
@@ -78,17 +79,6 @@ module "alb" {
 
   tags = {
     Environment = "dev"
-  }
-}
-
-resource "aws_instance" "web" {
-  ami                    = data.aws_ami.app_ami.id
-  instance_type          = var.instance_type
-  subnet_id              = module.vpc.public_subnets[0]
-  vpc_security_group_ids = [module.security-group.security_group_id]
-
-  tags = {
-    Name = "HelloWorldBea"
     Project = "Cap Build"
   }
 }
