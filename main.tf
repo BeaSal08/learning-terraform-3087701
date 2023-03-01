@@ -3,7 +3,7 @@ data "aws_ami" "app_ami" {
 
   filter {
     name   = "name"
-    values = ["bitnami-tomcat-*-x86_64-hvm-ebs-nami"]
+    values = [var.ami_filter.name]
   }
 
   filter {
@@ -11,44 +11,46 @@ data "aws_ami" "app_ami" {
     values = ["hvm"]
   }
 
-  owners = ["979382823631"] # Bitnami
+  owners = [var.ami_filter.owner] # Bitnami
 }
 
 module "vpc" {
+
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc-bea"
-  cidr = "10.0.0.0/16"
+  name = var.environment.name
+  cidr = "${var.environment.network_prefix}.0.0/16"
 
   azs             = ["us-east-1a", "us-east-1b"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
+  public_subnets  = ["${var.environment.network_prefix}.101.0/24", "${var.environment.network_prefix}.102.0/24"]
 
   enable_nat_gateway = true
 
   tags = {
     Terraform = "true"
-    Project = "Cap Build"
-    Environment = "dev"
+        Project = "Cap Build"
+    Environment = var.environment.name
   }
 }
 
 module "autoscaling" {
+
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "6.5.2"
 
-  name = "blog"
+  name = "auto"
 
-  min_size            = 1
-  max_size            = 2
-  vpc_zone_identifier = module.vpc.public_subnets
-  target_group_arns   = module.alb.target_group_arns
-  security_groups     = [module.security-group.security_group_id]
+  min_size            = var.asg_min
+  max_size            = var.asg_max
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
+  security_groups     = [module.blog_sg.security_group_id]
   instance_type       = var.instance_type
   image_id            = data.aws_ami.app_ami.id
 }
 
-
 module "alb" {
+
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
@@ -56,9 +58,9 @@ module "alb" {
 
   load_balancer_type = "application"
 
-  vpc_id             = module.vpc.vpc_id
-  subnets            = module.vpc.public_subnets
-  security_groups    = [module.security-group.security_group_id]
+  vpc_id             = module.blog_vpc.vpc_id
+  subnets            = module.blog_vpc.public_subnets
+  security_groups    = [module.blog_sg.security_group_id]
 
   target_groups = [
     {
