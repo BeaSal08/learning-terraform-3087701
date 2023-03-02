@@ -30,17 +30,6 @@ variable "environment" {
   }
 }
 
-variable "alb-name" {
-  description = "ALB name"
-
-  type        = object ({
-    name           = string
-  })
-  default = {
-    name           = "alb"
-  }
-}
-
 variable "asg_min" {
   description = "Minimum instance count for the ASG"
   default     = 1

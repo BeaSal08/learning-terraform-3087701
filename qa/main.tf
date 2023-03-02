@@ -6,7 +6,6 @@ module "qa" {
     network_prefix  = "10.1"
   }
 
-  alb-name = "new_alb
   asg_min = 1
   asg_max = 1
 }
