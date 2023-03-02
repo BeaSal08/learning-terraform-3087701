@@ -38,7 +38,7 @@ module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "6.5.2"
 
-  name = "auto"
+  name = "${var.environment.name}-auto"
 
   min_size            = var.asg_min
   max_size            = var.asg_max
@@ -54,7 +54,7 @@ module "alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "~> 6.0"
 
-  name = "alb"
+  name = "${var.environment.name}-alb"
 
   load_balancer_type = "application"
 
@@ -64,7 +64,7 @@ module "alb" {
 
   target_groups = [
     {
-      name_prefix      = "tbea-"
+      name_prefix      = "${var.environment.name}-"
       backend_protocol = "HTTP"
       backend_port     = 80
       target_type      = "instance"
@@ -80,7 +80,7 @@ module "alb" {
   ]
 
   tags = {
-    Environment = "dev"
+    Environment = var.environment.name
     Project = "Cap Build"
   }
 }
@@ -92,7 +92,7 @@ module "security-group" {
   version = "4.13.0"
 
   vpc_id  = module.vpc.vpc_id
-  name    = "helloworld-sg-module"
+  name    = "${var.environment.name}-helloworld-sg-module"
   ingress_rules = ["http-80-tcp"]
   ingress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules = ["all-all"]
