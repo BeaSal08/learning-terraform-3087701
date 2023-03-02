@@ -25,7 +25,7 @@ variable "environment" {
     network_prefix = string
   })
   default = {
-    name           = "test-bea"
+    name           = "test"
     network_prefix = "10.0"
   }
 }
